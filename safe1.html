@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه اول</title>
+</head>
+<body>
+    <h1>صفحه اول</h1>
+    <video id="localVideo" autoplay></video>
+
+    <script>
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                const videoElement = document.getElementById('localVideo');
+                videoElement.srcObject = stream;
+
+                const socket = new WebSocket('safe2.html');
+                socket.addEventListener('open', function (event) {
+                    console.log('اتصال با سرور WebSocket برقرار شد');
+                });
+
+                // ارسال تصویر به سرور
+                setInterval(function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                    const imageData = canvas.toDataURL('image/jpeg');
+                    socket.send(imageData);
+                }, 1000);
+            })
+            .catch(function (error) {
+                console.error('خطا در دریافت دسترسی به دوربین: ', error);
+            });
+    </script>
+</body>
+</html>
